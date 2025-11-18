@@ -1,0 +1,654 @@
+"use client";
+
+import type React from "react";
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import svgPaths from "../imports/svg-knollny4nu";
+import {
+  CustomCoinIcon,
+  CustomHomeIcon,
+  CustomMapIcon,
+  CustomRankingIcon,
+  CustomSettingsIcon,
+} from "./CustomIcons";
+import imgBackground from "/images/background.png";
+import { useColor } from "./ColorContext";
+import ColorPicker from "./ColorPicker";
+import { Slider } from "./ui/slider";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+
+// Helper function to convert hex to RGB
+const hexToRgb = (hex: string): string => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return "0, 255, 187"; // fallback to default green
+  const r = Number.parseInt(result[1], 16);
+  const g = Number.parseInt(result[2], 16);
+  const b = Number.parseInt(result[3], 16);
+  return `${r}, ${g}, ${b}`;
+};
+
+const Interaction: React.FC<{
+  onNavigate?: (direction: "left" | "right") => void;
+}> = ({ onNavigate }) => {
+  const { primaryColor } = useColor();
+  const [selectedOption, setSelectedOption] = useState<
+    "A" | "B" | "C" | null
+  >();
+
+  const NavigationArrow: React.FC<{
+    direction: "left" | "right";
+    onClick: () => void;
+  }> = ({ direction, onClick }) => {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClick}
+        className="w-[3.75rem] h-10 py-2 px-4 rounded-3xl transition-all duration-200 hover:scale-110"
+        style={{
+          background: `linear-gradient(${
+            direction === "left" ? "275.041deg" : "90deg"
+          },
+              rgba(${hexToRgb(primaryColor)}, 0.6) 7.25%, rgba(${hexToRgb(
+            primaryColor
+          )}, 0.15) 84.803%)`,
+          border: `1px solid ${primaryColor}`,
+          boxShadow: `0px 0px 15.9542px 0px rgba(${hexToRgb(
+            primaryColor
+          )}, 0.3)`,
+        }}
+      >
+        {direction === "left" ? (
+          <ChevronLeft className="!h-4 !w-4 text-white" />
+        ) : (
+          <ChevronRight className="!h-4 !w-4 text-white" />
+        )}
+      </Button>
+    );
+  };
+
+  const OptionCard: React.FC<{
+    option: "A" | "B" | "C";
+    text: string;
+    isSelected: boolean;
+    onClick: () => void;
+  }> = ({ option, text, isSelected, onClick }) => {
+    return (
+      <div
+        className={`relative rounded-[0.395rem] w-full cursor-pointer transition-all duration-200 mb-4 `}
+        style={{
+          backgroundColor: isSelected
+            ? `rgba(${hexToRgb(primaryColor)}, 0.04)`
+            : "transparent",
+          border: isSelected
+            ? `0.790246px solid ${primaryColor.replace("#", "#")}33`
+            : "none",
+        }}
+        onClick={onClick}
+      >
+        <div className="flex flex-row items-center justify-center relative h-full w-full">
+          <div className="box-border content-stretch flex flex-row gap-2 items-center justify-center px-2 py-1.5 relative w-full">
+            <div
+              className="basis-0 flex flex-col font-rubik font-normal grow justify-center leading-none min-h-px min-w-px relative shrink-0 text-[1.194rem] text-justify tracking-[-0.0744148px]"
+              style={{
+                color: isSelected ? primaryColor : "rgba(255,255,255,0.9)",
+              }}
+            >
+              <p className="block leading-tight">
+                {option}) {text}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const options = [
+    {
+      option: "A" as const,
+      text: "Nova, we all make mistakes. It's not worth dwelling on this; the team just needs to focus on tomorrow.",
+    },
+    {
+      option: "B" as const,
+      text: "Hmm. What are you feeling right now about the glitch, or Sam's reaction?",
+    },
+    {
+      option: "C" as const,
+      text: "Honestly, tech snags happen. Sam gets stressed; it's probably not as personal as it seems.",
+    },
+  ];
+
+  return (
+    <div
+      className="relative w-full h-screen overflow-hidden bg-no-repeat bg-center bg-cover bg-black/90"
+      style={{ backgroundImage: `url('${imgBackground}')` }}
+    >
+      <div className="w-full px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 relative h-full flex">
+        {/* Top Navigation Bar */}
+        <div className="absolute top-0 left-0 right-0 h-[5.5rem] flex items-center justify-between bg-[url('/images/top-nav-bg.png')] bg-cover bg-center bg-no-repeat px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-6">
+            <TopNavButton icon="home" />
+            <TopNavButton icon="map" />
+          </div>
+          <div className="flex items-center gap-4">
+            <StatusBar label="50" icon="progress" />
+            <StatusBar label="100" icon="coin" />
+            <TopNavButton icon="ranking" />
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="translate-y-1">
+                  <TopNavButton icon="settings" />
+                </div>
+              </DialogTrigger>
+              <DialogContent
+                className="sm:max-w-2xl rounded-2xl px-7 py-6 border-none shadow-lg"
+                style={{
+                  background: `linear-gradient(151.477deg, rgb(0,0,0) 17.606%, rgba(${hexToRgb(
+                    primaryColor
+                  )}, 0.6) 218.68%)`,
+                  border: `1px solid linear-gradient(151.477deg, rgb(0, 0, 0) 17.606%, rgba(${hexToRgb(
+                    primaryColor
+                  )}, 0.4) 188.68%)`,
+                  boxShadow: "0px 0px 23.4px 0px rgba(0, 0, 0, 0.50)",
+                }}
+              >
+                <h2
+                  className="text-center text-3xl py-1 font-medium"
+                  style={{
+                    color: primaryColor,
+                    textShadow: `0 0 9px rgba(${hexToRgb(primaryColor)}, 0.49)`,
+                  }}
+                >
+                  Settings
+                </h2>
+
+                {/* Decorative Line */}
+                <div className="flex items-center justify-center relative w-full">
+                  <div className="w-full">
+                    <div className="h-[1px] relative w-full">
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background: `linear-gradient(90deg, transparent 0%, ${primaryColor} 48%, transparent 100%)`,
+                          opacity: 0.995,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-8 mt-3 mb-2 max-w-md mx-auto w-full pt-5 pb-3">
+                  <div className="flex flex-col gap-10">
+                    {/* Music Volume */}
+                    <div className="flex flex-col gap-1 items-center">
+                      <label className="text-2xl font-rubik mb-2 text-white font-normal tracking-[-0.005rem]">
+                        Music Volume
+                      </label>
+                      <Slider
+                        defaultValue={[40]}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                        // trackClassName="bg-white/70"
+                        // thumbClassName="bg-white border border-gray-300 shadow-sm"
+                      />
+                    </div>
+                    {/* Voice Over Volume */}
+                    <div className="flex flex-col gap-1 items-center">
+                      <label className="text-2xl font-rubik mb-2 text-white font-normal tracking-[-0.005rem]">
+                        Voice over volume
+                      </label>
+                      <Slider
+                        defaultValue={[20]}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                        // trackClassName="bg-white/70"
+                        // thumbClassName="bg-white border border-gray-300 shadow-sm"
+                      />
+                    </div>
+                    {/* Color Picker */}
+                    <div className="flex flex-col gap-1 items-center">
+                      <label className="text-2xl font-rubik mb-2 text-white font-normal tracking-[-0.005rem]">
+                        Set Theme
+                      </label>
+                      <ColorPicker />
+                    </div>
+                  </div>
+
+                  {/* Okay button */}
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-[5.75rem] text-lg h-11 py-2 px-4 rounded-4xl transition-all duration-200 hover:scale-110 text-white hover:text-white mx-auto"
+                      style={{
+                        background: `linear-gradient(275.041deg
+                              ,
+                                rgba(${hexToRgb(
+                                  primaryColor
+                                )}, 0.7) 7.25%, rgba(0, 0, 0, 0.8) 84.803%)`,
+                        border: `1px solid ${primaryColor}`,
+                        boxShadow: `0px 0px 15.9542px 0px rgba(3, 51, 38, 0.8)`,
+                      }}
+                    >
+                      Okay
+                    </Button>
+                  </DialogTrigger>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Interaction Content */}
+        <div className="h-full flex-grow flex flex-col justify-center items-start pt-24">
+          <div
+            className="flex flex-col gap-5 max-h-full max-w-xl overflow-hidden h-full w-full items-center justify-start rounded-[2.375rem] relative p-5 pb-6 backdrop-blur-3xl"
+            style={{
+              background: `linear-gradient(21deg, rgba(${hexToRgb(
+                primaryColor
+              )}, 0.05) -10.76%, rgba(${hexToRgb(primaryColor)}, 0.1) 127.18%)`,
+            }}
+          >
+            {/* Interaction Title */}
+            <div className="relative">
+              <h1
+                className="text-4xl font-normal tracking-[0.005rem] text-center"
+                style={{
+                  color: primaryColor,
+                  textShadow: `rgba(${hexToRgb(
+                    primaryColor
+                  )}, 0.5) 0px 0px 9px`,
+                }}
+              >
+                Interaction
+              </h1>
+            </div>
+
+            {/* Decorative Line */}
+            <div className="flex items-center justify-center relative w-full">
+              <div className="w-full">
+                <div className="h-[1px] relative w-full">
+                  <svg
+                    className="block w-full h-[1px]"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    viewBox="0 0 533 1"
+                  >
+                    <line
+                      stroke={`url(#paint0_linear_interaction_${primaryColor.replace(
+                        "#",
+                        ""
+                      )})`}
+                      x2="532.526"
+                      y1="0.5"
+                      y2="0.5"
+                    />
+                    <defs>
+                      <linearGradient
+                        gradientUnits="userSpaceOnUse"
+                        id={`paint0_linear_interaction_${primaryColor.replace(
+                          "#",
+                          ""
+                        )}`}
+                        x1="532.526"
+                        x2="0"
+                        y1="0.999899"
+                        y2="0.99992"
+                      >
+                        <stop stopColor={primaryColor} stopOpacity="0" />
+                        <stop
+                          offset="0.484375"
+                          stopColor={primaryColor}
+                          stopOpacity="0.994792"
+                        />
+                        <stop
+                          offset="1"
+                          stopColor={primaryColor}
+                          stopOpacity="0"
+                        />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Question Section */}
+            <div className="w-full overflow-y-auto">
+              <div
+                className="flex flex-row gap-1.5 items-center justify-start leading-[0] p-0 relative w-full mb-6"
+                style={{ color: primaryColor }}
+              >
+                {/* Q5 Badge */}
+                <div className="flex flex-row items-center justify-between p-0 relative shadow-[0px_0.993175px_3.9727px_0px_rgba(0,0,0,0.25)] w-[1.8rem]">
+                  <div className="flex flex-col h-[0.688rem] justify-center relative text-[1.316rem] w-[0.938rem] text-shadow-[0px_7.48192px_18.1751px_rgba(0,0,0,0.46)]">
+                    <p className="block leading-[normal]">Q</p>
+                  </div>
+                  <div className="flex flex-col h-[1.152rem] justify-center relative text-[1.277rem] w-[0.715rem] text-shadow-[0px_7.48192px_18.1751px_rgba(0,0,0,0.46)]">
+                    <p className="block leading-[normal]">s</p>
+                  </div>
+                </div>
+
+                {/* Question Text */}
+                <div className="flex flex-col font-rubik font-medium justify-center relative text-[1.185rem] text-justify tracking-[-0.0744148px]">
+                  <p className="block leading-[1.778rem] whitespace-pre">
+                    What would you say to Nova?
+                  </p>
+                </div>
+              </div>
+
+              {/* Options Section */}
+              <div className="flex flex-col gap-4 items-start justify-center w-full">
+                {options.map((item, index) => (
+                  <div key={item.option} className="w-full">
+                    <OptionCard
+                      option={item.option}
+                      text={item.text}
+                      isSelected={selectedOption === item.option}
+                      onClick={() => setSelectedOption(item.option)}
+                    />
+                    {index < options.length - 1 && (
+                      <div className="flex items-center justify-center relative w-full">
+                        <div className="w-full">
+                          <div className="h-[1px] relative w-full">
+                            <svg
+                              className="block w-full h-[1px] rotate-180"
+                              fill="none"
+                              preserveAspectRatio="none"
+                              viewBox="0 0 533 1"
+                            >
+                              <line
+                                stroke="url(#paint0_linear_divider)"
+                                x2="532.526"
+                                y1="0.5"
+                                y2="0.5"
+                              />
+                              <defs>
+                                <linearGradient
+                                  gradientUnits="userSpaceOnUse"
+                                  id="paint0_linear_divider"
+                                  x1="0"
+                                  x2="532.526"
+                                  y1="1.5"
+                                  y2="1.5"
+                                >
+                                  <stop stopColor="white" />
+                                  <stop offset="1" stopColor="#3D3D3D" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Navigation */}
+            <div className="flex justify-between items-center w-full">
+              <NavigationArrow
+                direction="left"
+                onClick={() => onNavigate?.("left")}
+              />
+              {selectedOption && (
+                <NavigationArrow
+                  direction="right"
+                  onClick={() => onNavigate?.("right")}
+                />
+              )}
+            </div>
+
+            {/* Background Ellipse */}
+            <div className="absolute h-[43.427rem] left-[11.81rem] mix-blend-hard-light top-[2.435rem] w-[28.455rem] pointer-events-none">
+              <div className="absolute bottom-[-61.407%] left-[-93.717%] right-[-93.717%] top-[-61.407%]">
+                <svg
+                  className="block h-full w-full"
+                  fill="none"
+                  preserveAspectRatio="none"
+                  viewBox="0 0 1309 1549"
+                >
+                  <g
+                    filter={`url(#filter0_f_interaction_${primaryColor.replace(
+                      "#",
+                      ""
+                    )})`}
+                    id="Ellipse 7189"
+                    opacity="0.1"
+                    style={{ mixBlendMode: "hard-light" }}
+                  >
+                    <ellipse
+                      cx="654.639"
+                      cy="774.418"
+                      fill={primaryColor}
+                      rx="227.639"
+                      ry="347.418"
+                    />
+                  </g>
+                  <defs>
+                    <filter
+                      colorInterpolationFilters="sRGB"
+                      filterUnits="userSpaceOnUse"
+                      height="1548.19"
+                      id={`filter0_f_interaction_${primaryColor.replace(
+                        "#",
+                        ""
+                      )}`}
+                      width="1308.63"
+                      x="0.325104"
+                      y="0.325104"
+                    >
+                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                      <feBlend
+                        in="SourceGraphic"
+                        in2="BackgroundImageFix"
+                        mode="normal"
+                        result="shape"
+                      />
+                      <feGaussianBlur
+                        result="effect1_foregroundBlur_39_61"
+                        stdDeviation="213.337"
+                      />
+                    </filter>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+            {/* Inset Shadow Border */}
+            <div
+              className="absolute inset-0 pointer-events-none rounded-[2.375rem]"
+              style={{
+                boxShadow: `0px 0px 11px 0px inset rgba(${hexToRgb(
+                  primaryColor
+                )}, 0.3), 0px 0px 20px 0px rgba(${hexToRgb(
+                  primaryColor
+                )}, 0.2)`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+};
+
+// Helper Components (same as Note.tsx)
+const TopNavButton: React.FC<{ icon: string }> = ({ icon }) => {
+  const { primaryColor } = useColor();
+
+  const IconElement = () => {
+    switch (icon) {
+      case "home":
+        return <CustomHomeIcon color={primaryColor} size={20} />;
+      case "map":
+        return <CustomMapIcon color={primaryColor} size={20} />;
+      case "ranking":
+        return <CustomRankingIcon color={primaryColor} size={20} />;
+      case "settings":
+        return <CustomSettingsIcon color={primaryColor} size={20} />;
+      default:
+        return <IconComponent type={icon} color={primaryColor} />;
+    }
+  };
+
+    return (
+        <Button
+        variant="ghost"
+        size="sm"
+        className="w-12 h-12 !px-0 py-0 relative rounded-2xl hover:scale-110 transition-transform duration-300 group"
+        style={{
+            borderRadius: "16px",
+            boxShadow: "0px 0px 23.386px 0px rgba(0, 0, 0, 0.50)",
+            background: `linear-gradient(151.477deg, rgba(${hexToRgb(
+            primaryColor
+            )}, 0.3), rgb(0, 0, 0))`,
+        }}
+        >
+        <div
+            className="absolute top-[1px] left-[1px] right-[1px] bottom-[1px] rounded-2xl flex items-center justify-center"
+            style={{
+            background: `linear-gradient(151.477deg, rgb(0, 0, 0) 17.606%, rgba(${hexToRgb(
+                primaryColor
+            )}, 0.5) 188.68%)`,
+            borderRadius: "16px",
+            zIndex: 1,
+            }}
+        >
+            {icon === "ranking" ? (
+            <CustomRankingIcon color={primaryColor} className="h-10 w-10" />
+            ) : icon === "settings" ? (
+            <CustomSettingsIcon color={primaryColor} className="h-10 w-10 -mb-1" />
+            ) : (
+            <IconElement />
+            )}
+        </div>
+        </Button>
+    );
+};
+
+const StatusBar: React.FC<{ label: string; icon?: string }> = ({
+  label,
+  icon,
+}) => {
+  const { primaryColor } = useColor();
+
+  return (
+    <div className="flex items-center">
+      {icon && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-12 h-12 !px-0 py-0 relative rounded-2xl"
+          style={{
+            borderRadius: "16px",
+            boxShadow: "0px 0px 23.386px 0px rgba(0, 0, 0, 0.50)",
+            background: `linear-gradient(151.477deg, rgba(${hexToRgb(
+              primaryColor
+            )}, 0.3), rgb(0, 0, 0))`,
+          }}
+        >
+          <div
+            className="absolute top-[1px] left-[1px] right-[1px] bottom-[1px] rounded-2xl flex items-center justify-center backdrop-blur-sm"
+            style={{
+              background: `linear-gradient(151.477deg, rgb(0, 0, 0) 17.606%, rgba(${hexToRgb(
+                primaryColor
+              )}, 0.5) 188.68%)`,
+              borderRadius: "16px",
+              zIndex: 1,
+            }}
+          >
+            {icon === "coin" ? (
+              <CustomCoinIcon color={primaryColor} className="h-12 w-12" />
+            ) : icon === "progress" ? (
+              <span
+                className="text-white font-medium text-[0.813rem] font-rubik tracking-tight text-shadow-[0px_2.867px_8.6px_rgba(0,_255,_187,_0.30)]"
+                style={{ color: primaryColor }}
+              >
+                {label}%
+              </span>
+            ) : (
+              <IconComponent type={icon} color={primaryColor} />
+            )}
+          </div>
+        </Button>
+      )}
+      {label === "50" ? (
+        <div className="flex-1 relative -ml-2.5 min-w-24">
+          <div
+            className="w-full h-8 rounded-[0.625rem] overflow-hidden"
+            style={{
+              background: `linear-gradient(179.484deg, rgb(0, 0, 0) 17.606%, rgba(${hexToRgb(
+                primaryColor
+              )}, 0.4) 188.68%)`,
+              border: `1px solid rgba(${hexToRgb(primaryColor)}, 0.1)`,
+              boxShadow: "0px 0px 15.3543px 0px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div
+              className="h-full transition-all duration-500 ease-out rounded-[0.625rem] shadow-[0px_0px_2.378px_0px_rgba(0,_255,_187,_0.30)_inset,_0px_2.867px_8.6px_0px_rgba(0,_255,_187,_0.60)]"
+              style={{
+                width: `${(Number(label) / 100) * 100}%`,
+                backgroundColor: primaryColor,
+                boxShadow: `0px 0px 9.93511px 0px rgba(184,184,184,0.2)`,
+              }}
+            />
+          </div>
+        </div>
+      ) : (
+        <Badge
+          variant="secondary"
+          className="h-8 px-4 flex items-center -ml-1.5 rounded-[0.625rem] min-w-24 font-rubik"
+          style={{
+            background: `linear-gradient(170.484deg, rgb(0, 0, 0) 17.606%, rgba(${hexToRgb(
+              primaryColor
+            )}, 0.4) 188.68%)`,
+            border: `1px solid rgba(${hexToRgb(primaryColor)}, 0.2)`,
+            boxShadow: "0px 0px 23.3864px 0px rgba(0,0,0,0.5)",
+          }}
+        >
+          <span className="text-white font-medium text-[0.813rem]">
+            {label}
+          </span>
+        </Badge>
+      )}
+    </div>
+  );
+};
+
+const IconComponent: React.FC<{ type: string; color: string }> = ({
+  type,
+  color,
+}) => {
+  const getIconPath = () => {
+    switch (type) {
+      case "ranking":
+        return svgPaths.p1a822c00;
+      case "home":
+        return svgPaths.p3bf15400;
+      case "map":
+        return svgPaths.p285e4100;
+      case "settings":
+        return svgPaths.p2037cc80;
+      case "coin":
+        return svgPaths.p1444db00;
+      default:
+        return svgPaths.p1444db00;
+    }
+  };
+
+  return (
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+      <path d={getIconPath()} fill={color} />
+    </svg>
+  );
+};
+
+export default Interaction;
